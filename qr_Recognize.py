@@ -24,7 +24,9 @@ class CodeRecognition() :
         found = set()
 
         #cap = VideoStream(src=0).start()
-        cap = cv2.VideoCapture(1)
+        cap = cv2.VideoCapture(0)
+        cap.release()
+        cap = cv2.VideoCapture(0)
         time.sleep(2.0)
 
         found = False
@@ -71,6 +73,7 @@ class CodeRecognition() :
                 break
 
         cap.release()
+        #cvReleaseCapture(cap)
 
         print("[INFO] cleaning up...")
         csv.close()
@@ -141,3 +144,9 @@ class CodeRecognition() :
     
     def isSeller(self) :
         return self.isUserSeller
+    
+    def get_register_id(self) :
+        if self.isUserSeller :
+            return self.qr_data[1]
+        else :
+            return self.qr_data[0]

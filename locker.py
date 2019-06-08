@@ -19,6 +19,7 @@ class Locker() :
         print("movmov")
         
     def lock(self):
+        self.p.start(0)
         self.p.ChangeDutyCycle(4.0) #close
         time.sleep(1)
         self.p.stop()

@@ -23,7 +23,9 @@ class BarRecognition() :
         found = set()
 
         #cap = VideoStream(src=0).start()
-        cap = cv2.VideoCapture(1)
+        cap = cv2.VideoCapture(0)
+        cap.release()
+        cap = cv2.VideoCapture(0)
         time.sleep(2.0)
 
         found = False
@@ -70,6 +72,7 @@ class BarRecognition() :
                 break
 
         cap.release()
+        #cvReleaseCapture(cap)
 
         print("[INFO] cleaning up...")
         csv.close()

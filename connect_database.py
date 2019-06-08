@@ -32,3 +32,4 @@ class ConnectDB() :
     
         userdata = {"register_id" : register_id, "role": role}
         resp = requests.post(self.url + "update-trade-state.php", data=userdata)
+        print(resp.text)

@@ -12,6 +12,7 @@ import RPi.GPIO as GPIO
 from qr_Recognize import *
 from locker import *
 from barcode_Recognize import *
+from connect_database import *
 
 #Fontmain = tkinter.font.Font(family = 'Helvetica', size = 24, weight = 'bold')
 #Fontbutton = tkinter.font.Font(family = 'Helvetica', size = 20, weight = 'bold')
@@ -102,7 +103,7 @@ class GuiGui ():
         self.Gui_bar.resizable(0,0)
         Font1 = tkinter.font.Font(family = 'Helvetica', size = 24, weight = 'bold')
 
-        Text1 = Label(self.Gui_bar,text='책의 바코드를 인식하여주세요 ;)',font=Font1, fg='black', bg = '#CEF279', padx = 200, pady = 150)
+        Text1 = Label(self.Gui_bar,text='책의 바코드를 인식해주세요 ;)',font=Font1, fg='black', bg = '#CEF279', padx = 200, pady = 150)
         Text1.grid(row=0,column=0)
 
         StartButton= Button(self.Gui_bar, text='인식하기!', command = self.close_and_bar, fg='black', height = 1, width = 10, highlightbackground = '#FFFFFF', activebackground = '#FEC19E')
@@ -167,24 +168,22 @@ class GuiGui ():
         Text1 = Label(self.Gui_box,text= box_id+'번 북박스입니다!\n 이용 후 잠금버튼을 눌러주세요;)', font = Font1, fg='black', bg = '#CEF279', padx = 200, pady = 100)
         Text1.grid(row=0,column=0)
         
-        
-        
         UnlockButton= Button(self.Gui_box, text='열기', command = self.close_and_unlock, fg='black', height = 1, width = 10, highlightbackground = '#FFFFFF', activebackground = '#FEC19E')
         UnlockButton.grid(row = 1, column =0)
         LockButton= Button(self.Gui_box, text='잠그기', command = self.close_and_lock, fg='black', height = 1, width = 10, highlightbackground = '#FFFFFF', activebackground = '#FEC19E')
         LockButton.grid(row = 2, column =0)
-
-        #self.Gui_box.mainloop()
-    def close_and_lock(self):
-        self.Gui_box.iconify()
-        self.locker.lock()
-        self.INFORM_GUI()
     
     def close_and_unlock(self):
-        #self.Gui_box.iconify()
         self.locker.unlock()
     
-    def close_and_box(self) :
+    def close_and_lock(self) :
+        # Update trade state
+        db_connection = ConnectDB()
+        register_id = self.recognition.get_register_id()
+        print(register_id)
+        db_connection.update_trade_state(register_id, self.isSeller)
+        
+        self.locker.lock()
         self.Gui_box.iconify()
         
         if(self.isSeller):
@@ -195,9 +194,7 @@ class GuiGui ():
         else:
             print("!!buyer")
             self.INFORM_GUI()
-        #self.Gui_info.deiconify()
-        #self.Gui_thank.deiconify()
-    
+            
 # Infrom page for buyer
     def INFORM_GUI(self):
         self.Gui_info = Toplevel(self.Gui_welcome)
@@ -207,14 +204,14 @@ class GuiGui ():
         self.Gui_info.resizable(0,0)
         Font1 = tkinter.font.Font(family = 'Helvetica', size = 20, weight = 'bold')
 
-        Text1 = Label(self.Gui_info,text='이용해주셔서 감사합니다:)', font = Font1, fg='black', bg = '#CEF279', padx = 170, pady = 50)
+        Text1 = Label(self.Gui_info,text='이용해주셔서 감사합니다:)', font = Font1, fg='black', bg = '#CEF279', padx = 200, pady = 50)
         Text1.grid(row=0,column=0)
 
-        Text2 = Label(self.Gui_info,text='앱을 통하여 구매확정을 하거나 \n 책에 심각한 문제가 있을 시 신고를 해주세요!', font = Font1, fg='black', bg = '#CEF279', padx = 130, pady = 50)
+        Text2 = Label(self.Gui_info,text='앱을 통하여 구매확정을 하거나 \n 책에 심각한 문제가 있을 시 신고를 해주세요!', font = Font1, fg='black', bg = '#CEF279', padx = 170, pady = 50)
         Text2.grid(row=1,column=0)
         
-        CloseButton= Button(self.Gui_info, text='처음 페이지로 돌아가기', command = self.close_and_info, fg='black', height = 1, width = 15, highlightbackground = '#FFFFFF', activebackground = '#FEC19E')
-        CloseButton.grid(row = 2, column =0)
+        #CloseButton= Button(self.Gui_info, text='처음 페이지로 돌아가기', command = self.close_and_info, fg='black', height = 1, width = 15, highlightbackground = '#FFFFFF', activebackground = '#FEC19E')
+        #CloseButton.grid(row = 2, column =0)
         
     
     def close_and_info(self) :
@@ -232,19 +229,19 @@ class GuiGui ():
         
         Font1 = tkinter.font.Font(family = 'Helvetica', size = 20, weight = 'bold')
 
-        Text1 = Label(self.Gui_no,text='예약정보가 없네요!', font = Font1, fg='black', bg = '#CEF279', padx = 200, pady = 50)
+        Text1 = Label(self.Gui_no,text='예약정보가 없네요!', font = Font1, fg='black', bg = '#CEF279', padx = 240, pady = 50)
         Text1.grid(row=0,column=0)
 
-        Text2 = Label(self.Gui_no,text='다시 한 번 확인해주세요:D', font = Font1, fg='black', bg = '#CEF279', padx = 150, pady = 50)
+        Text2 = Label(self.Gui_no,text='다시 한 번 확인해주세요:D', font = Font1, fg='black', bg = '#CEF279', padx = 200, pady = 50)
         Text2.grid(row=1,column=0)
         
-        CloseButton= Button(self.Gui_no, text='QR인식 페이지로 돌아가기', command = self.close_and_no, fg='black', height = 1, width = 16, highlightbackground = '#FFFFFF', activebackground = '#FEC19E')
+        CloseButton= Button(self.Gui_no, text='처음 페이지로 돌아가기', command = self.close_and_no, fg='black', height = 1, width = 16, highlightbackground = '#FFFFFF', activebackground = '#FEC19E')
         CloseButton.grid(row = 2, column =0)
         
         
     def close_and_no(self) :
         self.Gui_no.iconify()
-        self.Gui_qr.deiconify()
+        #self.Gui_qr.deiconify()
     
     #Thank page for seller
     def THANK_GUI(self):
@@ -255,11 +252,11 @@ class GuiGui ():
         self.Gui_thank.resizable(0,0)
         Font1 = tkinter.font.Font(family = 'Helvetica', size = 20, weight = 'bold')
     
-        Text1 = Label(self.Gui_thank,text='이용해주셔서 감사합니다!', font = Font1, fg='black', bg = '#CEF279', padx = 200, pady = 150)
+        Text1 = Label(self.Gui_thank,text='이용해주셔서 감사합니다!', font = Font1, fg='black', bg = '#CEF279', padx = 250, pady = 150)
         Text1.grid(row=0,column=0)
         
-        CloseButton= Button(self.Gui_thank, text='처음 페이지로 돌아가기', command = self.close_and_thank, fg='black', height = 1, width = 15, highlightbackground = '#FFFFFF', activebackground = '#FEC19E')
-        CloseButton.grid(row = 2, column =0)
+        #CloseButton= Button(self.Gui_thank, text='처음 페이지로 돌아가기', command = self.close_and_thank, fg='black', height = 1, width = 15, highlightbackground = '#FFFFFF', activebackground = '#FEC19E')
+        #CloseButton.grid(row = 2, column =0)
     
 
         
